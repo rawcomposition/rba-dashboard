@@ -92,10 +92,10 @@ export default function Home() {
   return (
     <div className="flex flex-col h-full">
       <Head>
-        <title>Lower 48 Rare Birds</title>
+        <title>RBA Dashboard</title>
       </Head>
 
-      <Header title="Lower 48 Rare Birds" />
+      <Header />
       <main className="h-[calc(100%-60px)]">
         <Sidebar>
           <div className="mb-6">

@@ -23,8 +23,6 @@ const initialState: Profile = {
   radius: 50,
   lat: undefined,
   lng: undefined,
-  enableExperimental: false,
-  dismissedNoticeId: "",
 };
 
 export const ProfileContext = React.createContext<ContextT>({
@@ -109,14 +107,12 @@ const ProfileProvider = ({ children }: Props) => {
     <ProfileContext.Provider
       value={{
         id: state.id,
-        enableExperimental: state.enableExperimental,
         lifelist,
         exceptions: state.exceptions || [],
         countryLifelist: state.countryLifelist || [],
         radius: state.radius || 50,
         lat: state.lat,
         lng: state.lng,
-        dismissedNoticeId: state.dismissedNoticeId,
         setLat,
         setLng,
         setLifelist,

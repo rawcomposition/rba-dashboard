@@ -6,8 +6,6 @@ export type Profile = {
   radius: number;
   lat?: number;
   lng?: number;
-  enableExperimental?: boolean;
-  dismissedNoticeId?: string;
 };
 
 export type RareObservation = {
