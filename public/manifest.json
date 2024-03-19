@@ -1,0 +1,7 @@
+{
+  "short_name": "RBA Dash",
+  "name": "RBA Dashboard",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "start_url": "/"
+}
