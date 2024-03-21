@@ -24,8 +24,8 @@ export default function SpeciesList({ heading, items, expanded, onToggleExpand, 
     <div className="mb-8">
       <h2 className="font-bold mb-4 text-gray-500">{heading}</h2>
       {items?.length === 0 && <p className="text-gray-500 text-sm">No results found</p>}
-      {items?.map(({ name, code, reports, abaCode, imgUrl }) => {
-        const isExpanded = expanded.includes(code);
+      {items?.map(({ name, sciName, reports, abaCode, imgUrl }) => {
+        const isExpanded = expanded.includes(sciName);
         const date = reports[0].obsDt;
         const distances = reports.map(({ distance }) => distance).filter((value) => !!value);
         const shortestDistance = distances.sort((a, b) => (a || 0) - (b || 0)).shift() || null;
@@ -36,8 +36,8 @@ export default function SpeciesList({ heading, items, expanded, onToggleExpand, 
         }));
 
         return (
-          <article key={code} className="mb-4 border border-gray-200 bg-white shadow-sm rounded-md w-full">
-            <div className="flex cursor-pointer" onClick={() => onToggleExpand(code)}>
+          <article key={sciName} className="mb-4 border border-gray-200 bg-white shadow-sm rounded-md w-full">
+            <div className="flex cursor-pointer" onClick={() => onToggleExpand(sciName)}>
               <div className="flex-shrink-0 p-4 mr-4">
                 <img
                   src={imgUrl || "/placeholder.png"}
