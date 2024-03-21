@@ -4,9 +4,6 @@ import { Profile } from "lib/types";
 import { subscribeToProfile, setProfileValue } from "lib/firebase";
 
 interface ContextT extends Profile {
-  setLifelist: (lifelist: string[]) => Promise<void>;
-  addToLifeList: (code: string) => Promise<void>;
-  setExceptions: (exceptions: string) => Promise<void>;
   setCountryLifelist: (lifelist: string[]) => Promise<void>;
   setRadius: (radius: number) => Promise<void>;
   setLat: (lat: number) => Promise<void>;
@@ -17,8 +14,6 @@ interface ContextT extends Profile {
 
 const initialState: Profile = {
   id: "",
-  lifelist: [],
-  exceptions: [],
   countryLifelist: [],
   radius: 50,
   lat: undefined,
@@ -27,9 +22,6 @@ const initialState: Profile = {
 
 export const ProfileContext = React.createContext<ContextT>({
   ...initialState,
-  setLifelist: async () => {},
-  setExceptions: async () => {},
-  addToLifeList: async () => {},
   setCountryLifelist: async () => {},
   setRadius: async () => {},
   setLat: async () => {},
@@ -52,25 +44,6 @@ const ProfileProvider = ({ children }: Props) => {
     const unsubscribe = subscribeToProfile((profile) => setState(profile));
     return () => unsubscribe();
   }, [uid]);
-
-  const setLifelist = async (lifelist: string[]) => {
-    setState((state) => ({ ...state, lifelist }));
-    await setProfileValue("lifelist", lifelist);
-  };
-
-  const setExceptions = async (exceptionsString: string) => {
-    const exceptions = exceptionsString
-      .split(",")
-      .map((it) => it.trim().toLowerCase())
-      .filter(Boolean);
-    setState((state) => ({ ...state, exceptions }));
-    await setProfileValue("exceptions", exceptions);
-  };
-
-  const addToLifeList = async (code: string) => {
-    setState((state) => ({ ...state, lifelist: [...state.lifelist, code] }));
-    await setProfileValue("lifelist", [...state.lifelist, code]);
-  };
 
   const setCountryLifelist = async (countryLifelist: string[]) => {
     setState((state) => ({ ...state, countryLifelist }));
@@ -101,23 +74,16 @@ const ProfileProvider = ({ children }: Props) => {
     setState(initialState);
   };
 
-  const lifelist = state.lifelist.filter((it) => !state.exceptions?.includes(it)) || [];
-
   return (
     <ProfileContext.Provider
       value={{
         id: state.id,
-        lifelist,
-        exceptions: state.exceptions || [],
         countryLifelist: state.countryLifelist || [],
         radius: state.radius || 50,
         lat: state.lat,
         lng: state.lng,
         setLat,
         setLng,
-        setLifelist,
-        setExceptions,
-        addToLifeList,
         setCountryLifelist,
         setRadius,
         reset,

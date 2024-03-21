@@ -11,11 +11,10 @@ type Props = {
   onToggleExpand: (code: string) => void;
   lat?: number;
   lng?: number;
-  radius?: number;
   heading: string;
 };
 
-export default function SpeciesList({ heading, items, expanded, onToggleExpand, radius, lat, lng }: Props) {
+export default function SpeciesList({ heading, items, expanded, onToggleExpand, lat, lng }: Props) {
   const getAbaCodeColor = (code?: number) => {
     if (code && code <= 3) return "border-gray-200 text-gray-800";
     if (code === 4) return "border-red-700 text-red-800";

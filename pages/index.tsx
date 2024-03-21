@@ -77,12 +77,12 @@ export default function Home() {
     }
   };
 
-  const filteredSpecies = formattedSpecies?.filter(({ code }) => !countryLifelist.includes(code));
+  const filteredSpecies = formattedSpecies?.filter(({ sciName }) => !countryLifelist.includes(sciName));
   const speciesInRadius = filteredSpecies?.filter(({ reports }) =>
     reports.some(({ distance }) => distance && distance <= radius)
   );
   const speciesOutsideRadius = filteredSpecies?.filter(({ reports }) =>
-    reports.some(({ distance }) => distance && distance > radius)
+    reports.some(({ distance }) => !distance || distance > radius)
   );
 
   const showNoResults = lat && lng && !loading && species !== null && filteredSpecies?.length === 0 && !error;
@@ -153,7 +153,7 @@ export default function Home() {
           </div>
           <div className="-mx-6 mt-6 mb-8">
             <Expand heading="US Life List" count={countryLifelist?.length} className="text-white">
-              <Button size="sm" color="primary" href="/import-lifelist?isCountry=true">
+              <Button size="sm" color="primary" href="/import-lifelist">
                 Import Life List
               </Button>
             </Expand>
@@ -176,7 +176,6 @@ export default function Home() {
                 expanded={expanded}
                 lat={lat}
                 lng={lng}
-                radius={radius}
               />
             )}
 
@@ -188,7 +187,6 @@ export default function Home() {
                 expanded={expanded}
                 lat={lat}
                 lng={lng}
-                radius={radius}
               />
             )}
 

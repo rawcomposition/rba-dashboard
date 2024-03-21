@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const reportsBySpecies: any = {};
 
   reports.forEach((item) => {
-    if (!reportsBySpecies[item.speciesCode]) {
+    if (!reportsBySpecies[item.sciName]) {
       // @ts-ignore
       const abaSpecies = ABASpecies[item.sciName];
       let imgUrl = undefined;
@@ -64,15 +64,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             abaSpecies.imgUrl.replace("/commons/", "/commons/thumb/") + "/200px-" + imgSplit[imgSplit.length - 1];
         }
       }
-      reportsBySpecies[item.speciesCode] = {
+      reportsBySpecies[item.sciName] = {
         name: item.comName,
-        code: item.speciesCode,
+        sciName: item.sciName,
         abaCode: abaSpecies?.abaCode,
         imgUrl,
         reports: [],
       };
     }
-    reportsBySpecies[item.speciesCode].reports.push(item);
+    reportsBySpecies[item.sciName].reports.push(item);
   });
 
   const species = Object.entries(reportsBySpecies).map(([key, value]) => value);

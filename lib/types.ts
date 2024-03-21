@@ -1,7 +1,5 @@
 export type Profile = {
   id: string;
-  lifelist: string[];
-  exceptions?: string[];
   countryLifelist: string[];
   radius: number;
   lat?: number;
@@ -25,7 +23,7 @@ export type RareObservation = {
 
 export type Species = {
   name: string;
-  code: string;
+  sciName: string;
   abaCode?: number;
   imgUrl?: string;
   reports: RareObservation[];
