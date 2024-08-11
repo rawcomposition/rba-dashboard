@@ -1,12 +1,6 @@
 import React from "react";
 import Sidebar from "components/Sidebar";
 import Header from "components/Header";
-import SpeciesList from "components/rba/SpeciesList";
-import Skeleton from "components/rba/Skeleton";
-import useFetchRBA from "hooks/useFetchRBA";
-import NoResults from "components/rba/NoResults";
-import FetchError from "components/rba/FetchError";
-import ResultsInfo from "components/rba/ResultsInfo";
 import Head from "next/head";
 import { useProfile } from "providers/profile";
 import Select from "components/ReactSelectStyled";
@@ -17,46 +11,13 @@ import LoginModal from "components/LoginModal";
 import { toast } from "react-hot-toast";
 import { debounce } from "lib/helpers";
 import { distanceBetween } from "lib/helpers";
+import List from "components/List";
 
 export default function Home() {
   const { countryLifelist, radius, lat, lng, setRadius, setLat, setLng } = useProfile();
 
-  const { species, loading, error, lastUpdate, call } = useFetchRBA();
-
-  const [expanded, setExpanded] = React.useState<string[]>([]);
-
-  React.useEffect(() => {
-    call();
-  }, [call]);
-
-  const formattedSpecies = React.useMemo(() => {
-    if (!species) return [];
-    return species.map((species) => {
-      const reports = species.reports.map((report) => {
-        const distance =
-          lat && lng ? parseInt(distanceBetween(lat, lng, report.lat, report.lng, false).toFixed(2)) : null;
-        return {
-          ...report,
-          distance,
-        };
-      });
-      return {
-        ...species,
-        reports,
-      };
-    });
-  }, [species, lat, lng]);
-
   const handleLatChange = debounce(setLat, 1000);
   const handleLngChange = debounce(setLng, 1000);
-
-  const handleToggleExpand = (code: string) => {
-    if (expanded.includes(code)) {
-      setExpanded(expanded.filter((value) => value !== code));
-    } else {
-      setExpanded([...expanded, code]);
-    }
-  };
 
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
@@ -76,16 +37,6 @@ export default function Home() {
       toast.error("Geolocation is not supported by this browser.");
     }
   };
-
-  const filteredSpecies = formattedSpecies?.filter(({ sciName }) => !countryLifelist.includes(sciName));
-  const speciesInRadius = filteredSpecies?.filter(({ reports }) =>
-    reports.some(({ distance }) => distance && distance <= radius)
-  );
-  const speciesOutsideRadius = filteredSpecies?.filter(({ reports }) =>
-    reports.some(({ distance }) => !distance || distance > radius)
-  );
-
-  const showNoResults = lat && lng && !loading && species !== null && filteredSpecies?.length === 0 && !error;
 
   const selectedRadius = radius ? radiusOptions.find(({ value }) => value == radius) : null;
 
@@ -160,45 +111,9 @@ export default function Home() {
           </div>
         </Sidebar>
 
-        <div className="h-full overflow-auto grow pt-6 px-4 pb-6">
-          <div className="container mx-auto max-w-xl">
-            {error && <FetchError reload={call} />}
-
-            {loading && <Skeleton count={3} />}
-
-            {showNoResults && <NoResults reload={call} />}
-
-            {!loading && (
-              <SpeciesList
-                heading={`Nearby Reports (within ${radius} miles)`}
-                items={speciesInRadius}
-                onToggleExpand={handleToggleExpand}
-                expanded={expanded}
-                lat={lat}
-                lng={lng}
-              />
-            )}
-
-            {!loading && (
-              <SpeciesList
-                heading="Other Reports"
-                items={speciesOutsideRadius}
-                onToggleExpand={handleToggleExpand}
-                expanded={expanded}
-                lat={lat}
-                lng={lng}
-              />
-            )}
-
-            {!!filteredSpecies?.length && (
-              <ResultsInfo
-                count={filteredSpecies.length}
-                total={species?.length || 0}
-                onReload={call}
-                lastUpdate={lastUpdate?.toString()}
-              />
-            )}
-          </div>
+        <div className="flex">
+          <List code="US" label="Lower 48" type="rare" exclude={["US-AK", "US-HI"]} />
+          <List code="US-CA" label="California" type="rare" />
         </div>
       </main>
       <LoginModal />
