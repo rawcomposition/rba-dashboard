@@ -12,13 +12,11 @@ import LoginModal from "components/LoginModal";
 import Link from "next/link";
 
 export default function ImportLifelist() {
-  const { setCountryLifelist } = useProfile();
+  const { setRegionLifelist } = useProfile();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const router = useRouter();
-  const { tripId } = router.query;
-  const showBack = router.query.back === "true" && tripId;
-  const redirectUrl = tripId ? `/${tripId}` : `/`;
+  const region = router.query.region as string;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -35,9 +33,9 @@ export default function ImportLifelist() {
 
           fileInputRef.current?.value && (fileInputRef.current.value = "");
 
-          setCountryLifelist(sciNames);
+          setRegionLifelist(region, sciNames);
           toast.success("Life list uploaded");
-          router.push(redirectUrl);
+          router.push("/");
         },
       });
     } catch (error) {
@@ -55,19 +53,20 @@ export default function ImportLifelist() {
 
       <Header />
       <main className="max-w-2xl w-full mx-auto pb-12">
-        {showBack && (
-          <Link href={`/${tripId}`} className="text-gray-500 hover:text-gray-600 mt-6 inline-flex items-center">
-            ← Back to trip
-          </Link>
-        )}
+        <Link href="/" className="text-gray-500 hover:text-gray-600 mt-6 inline-flex items-center">
+          ← Back to trip
+        </Link>
         <div className="p-4 md:p-0 mt-8">
-          <h1 className="text-3xl font-bold text-gray-700 mb-8">
+          <h1 className="text-3xl font-bold text-gray-700 mb-4">
             <Icon name="feather" className="text-2xl text-lime-600" /> Import US Life List
           </h1>
+          <p className="text-gray-600 mb-6">
+            Region: <span className="font-medium">{region}</span>
+          </p>
           <div className="pt-4 p-5 bg-white rounded-lg shadow mb-8">
             <h3 className="text-lg font-medium mb-4 text-gray-700">1. Download life list from eBird</h3>
             <Button
-              href={`https://ebird.org/lifelist?r=US&time=life&fmt=csv`}
+              href={`https://ebird.org/lifelist?r=${region}&time=life&fmt=csv`}
               target="_blank"
               color="primary"
               size="sm"
@@ -82,8 +81,8 @@ export default function ImportLifelist() {
             <input ref={fileInputRef} type="file" accept=".csv" className="text-xs" onChange={handleFileUpload} />
           </div>
           <div className="flex">
-            <Button href={redirectUrl} color="gray" className="inline-flex items-center ml-auto">
-              {tripId ? "Skip" : "Cancel"}
+            <Button href="/" color="gray" className="inline-flex items-center ml-auto">
+              Cancel
             </Button>
           </div>
         </div>

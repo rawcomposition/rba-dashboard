@@ -73,8 +73,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             abaSpecies.imgUrl.replace("/commons/", "/commons/thumb/") + "/200px-" + imgSplit[imgSplit.length - 1];
         }
       }
+
+      const name = item.comName.split("(")[0].trim();
+
       reportsBySpecies[item.sciName] = {
-        name: item.comName,
+        name,
         sciName: item.sciName,
         abaCode: abaSpecies?.abaCode,
         imgUrl,

@@ -4,7 +4,7 @@ import { Profile } from "lib/types";
 import { subscribeToProfile, setProfileValue } from "lib/firebase";
 
 interface ContextT extends Profile {
-  setCountryLifelist: (lifelist: string[]) => Promise<void>;
+  setRegionLifelist: (region: string, lifelist: string[]) => Promise<void>;
   setRadius: (radius: number) => Promise<void>;
   setLat: (lat: number) => Promise<void>;
   setLng: (lng: number) => Promise<void>;
@@ -14,15 +14,15 @@ interface ContextT extends Profile {
 
 const initialState: Profile = {
   id: "",
-  countryLifelist: [],
   radius: 50,
   lat: undefined,
   lng: undefined,
+  lifelists: {},
 };
 
 export const ProfileContext = React.createContext<ContextT>({
   ...initialState,
-  setCountryLifelist: async () => {},
+  setRegionLifelist: async () => {},
   setRadius: async () => {},
   setLat: async () => {},
   setLng: async () => {},
@@ -45,9 +45,9 @@ const ProfileProvider = ({ children }: Props) => {
     return () => unsubscribe();
   }, [uid]);
 
-  const setCountryLifelist = async (countryLifelist: string[]) => {
-    setState((state) => ({ ...state, countryLifelist }));
-    await setProfileValue("countryLifelist", countryLifelist);
+  const setRegionLifelist = async (region: string, lifelist: string[]) => {
+    // @ts-ignore
+    await setProfileValue(`lifelists.${region}`, lifelist);
   };
 
   const setRadius = async (radius: number) => {
@@ -78,13 +78,13 @@ const ProfileProvider = ({ children }: Props) => {
     <ProfileContext.Provider
       value={{
         id: state.id,
-        countryLifelist: state.countryLifelist || [],
+        lifelists: state.lifelists || {},
         radius: state.radius || 50,
         lat: state.lat,
         lng: state.lng,
         setLat,
         setLng,
-        setCountryLifelist,
+        setRegionLifelist,
         setRadius,
         reset,
         dismissNotice,

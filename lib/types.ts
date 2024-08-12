@@ -1,6 +1,8 @@
 export type Profile = {
   id: string;
-  countryLifelist: string[];
+  lifelists: {
+    [key: string]: string[];
+  };
   radius: number;
   lat?: number;
   lng?: number;
