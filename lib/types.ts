@@ -1,12 +1,14 @@
 export type Profile = {
   id: string;
-  countryLifelist: string[];
+  lifelists: {
+    [key: string]: string[];
+  };
   radius: number;
   lat?: number;
   lng?: number;
 };
 
-export type RareObservation = {
+export type ReportT = {
   locName: string;
   subnational2Name: string;
   subnational1Name: string;
@@ -16,17 +18,17 @@ export type RareObservation = {
   userDisplayName: string;
   lat: number;
   lng: number;
-  distance: number | null;
-  isClosest: boolean;
+  distance?: number | null;
+  isClosest?: boolean;
   hasRichMedia: boolean;
 };
 
-export type Species = {
+export type SpeciesT = {
   name: string;
   sciName: string;
   abaCode?: number;
   imgUrl?: string;
-  reports: RareObservation[];
+  reports: ReportT[];
 };
 
 export type EbirdHotspot = {

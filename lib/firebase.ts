@@ -19,13 +19,9 @@ export const db = fs.initializeFirestore(app, { ignoreUndefinedProperties: true 
 export const setProfileValue = async (key: string, value: Profile[keyof Profile]) => {
   const user = auth.currentUser;
   if (!user) return;
-  await fs.setDoc(
-    fs.doc(db, "profile", user.uid),
-    {
-      [key]: value,
-    },
-    { merge: true }
-  );
+  await fs.updateDoc(fs.doc(db, "profile", user.uid), {
+    [key]: value,
+  });
 };
 
 export const subscribeToProfile = (callback: (profile: Profile) => void): (() => void) => {
@@ -34,6 +30,8 @@ export const subscribeToProfile = (callback: (profile: Profile) => void): (() =>
   return fs.onSnapshot(fs.doc(db, "profile", user.uid), (doc) => {
     if (doc.exists()) {
       callback({ id: doc.id, ...doc.data() } as Profile);
+    } else {
+      fs.setDoc(fs.doc(db, "profile", user.uid), {});
     }
   });
 };
