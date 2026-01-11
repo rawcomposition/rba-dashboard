@@ -1,5 +1,5 @@
 import ObservationList from "./ObservationList";
-import { Species as SpeciesT } from "lib/types";
+import { SpeciesT } from "lib/types";
 import { truncate } from "lib/helpers";
 import Timeago from "components/Timeago";
 import Icon from "components/Icon";
@@ -21,8 +21,8 @@ export default function SpeciesList({ heading, items, expanded, onToggleExpand, 
     if (code === 5) return "border-red-700 text-red-800";
   };
   return (
-    <div className="mb-8">
-      <h2 className="font-bold mb-4 text-gray-500">{heading}</h2>
+    <div>
+      <h2 className="text-[13px] text-gray-500 mb-4 font-medium">{heading}</h2>
       {items?.length === 0 && <p className="text-gray-500 text-sm">No results found</p>}
       {items?.map(({ name, sciName, reports, abaCode, imgUrl }) => {
         const isExpanded = expanded.includes(sciName);

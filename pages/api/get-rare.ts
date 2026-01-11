@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import ABASpecies from "../../aba-species.json";
 import { find } from "geo-tz";
 import dayjs from "dayjs";
+import { SpeciesT } from "lib/types";
 
 type RbaResponse = {
   obsId: string;
@@ -19,14 +20,19 @@ type RbaResponse = {
   locationPrivate: boolean;
   subId: string;
   subnational1Code: string;
+  subnational2Code: string;
+  subnational2Name: string;
+  subnational1Name: string;
+  userDisplayName: string;
+  hasRichMedia: boolean;
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const country = "US";
-  const excludeStates = ["US-HI", "US-AK"];
+  const code = req.query.code as string;
+  const exclude = (req.query.exclude as string)?.split(",") || [];
 
   const response = await fetch(
-    `https://api.ebird.org/v2/data/obs/${country}/recent/notable?detail=full&back=1&key=${process.env.NEXT_PUBLIC_EBIRD_KEY}`
+    `https://api.ebird.org/v2/data/obs/${code}/recent/notable?detail=full&back=1&key=${process.env.NEXT_PUBLIC_EBIRD_KEY}`
   );
   let reports: RbaResponse[] = await response.json();
 
@@ -47,10 +53,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       };
     })
     .filter(
-      ({ comName, subnational1Code }) => !comName.includes("(hybrid)") && !excludeStates.includes(subnational1Code)
+      ({ comName, subnational1Code, subnational2Code }) =>
+        !comName.includes("(hybrid)") && !exclude.includes(subnational1Code) && !exclude.includes(subnational2Code)
     );
 
-  const reportsBySpecies: any = {};
+  const reportsBySpecies: {
+    [key: string]: SpeciesT;
+  } = {};
 
   reports.forEach((item) => {
     if (!reportsBySpecies[item.sciName]) {
@@ -64,8 +73,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             abaSpecies.imgUrl.replace("/commons/", "/commons/thumb/") + "/200px-" + imgSplit[imgSplit.length - 1];
         }
       }
+
+      const name = item.comName.split("(")[0].trim();
+
       reportsBySpecies[item.sciName] = {
-        name: item.comName,
+        name,
         sciName: item.sciName,
         abaCode: abaSpecies?.abaCode,
         imgUrl,
@@ -75,7 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     reportsBySpecies[item.sciName].reports.push(item);
   });
 
-  const species = Object.entries(reportsBySpecies).map(([key, value]) => value);
+  const species: SpeciesT[] = Object.entries(reportsBySpecies).map(([key, value]) => value);
 
   res.status(200).json([...species]);
 }
