@@ -17,8 +17,8 @@ export default function Sidebar({ children, className, noPadding, widthClass, no
     <aside
       className={clsx(
         `h-[calc(100%_-_60px_-_${extraMenuHeight || 0}px)]`,
-        "flex flex-shrink-0 flex-col md:h-full bg-[#1e263a] fixed shadow-2xl md:shadow-none z-10",
-        !sidebarOpen && "-translate-x-full",
+        "flex flex-shrink-0 flex-col md:h-full bg-[#1e263a] fixed right-0 shadow-2xl md:shadow-none z-10",
+        !sidebarOpen && "translate-x-full",
         widthClass || "w-80",
         noAnimation ? "" : "transition-all",
         className
@@ -28,10 +28,10 @@ export default function Sidebar({ children, className, noPadding, widthClass, no
       <button
         type="button"
         onClick={() => setSidebarOpen((prev) => !prev)}
-        className="absolute top-4 -right-7 bg-[#1e263a] rounded-r-lg py-3 px-1"
+        className="absolute top-4 -left-7 bg-[#1e263a] rounded-l-lg py-3 px-1"
       >
         <svg
-          className={clsx("w-5 h-5 text-white", sidebarOpen ? "rotate-90" : "-rotate-90")}
+          className={clsx("w-5 h-5 text-white", sidebarOpen ? "-rotate-90" : "rotate-90")}
           fill="none"
           strokeLinecap="round"
           strokeLinejoin="round"

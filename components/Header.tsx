@@ -5,8 +5,6 @@ import useRealtimeStatus from "hooks/useRealtimeStatus";
 import clsx from "clsx";
 import { useRouter } from "next/router";
 import { useModal } from "providers/modals";
-import { useUser } from "providers/user";
-import AccountDropdown from "components/AccountDropdown";
 import BreadcrumbArrow from "components/BreadcrumbArrow";
 
 type Props = {
@@ -19,9 +17,7 @@ type Props = {
 
 export default function Header({ title, parent }: Props) {
   const { isOnline } = useRealtimeStatus();
-  const { open, close } = useModal();
-  const { user } = useUser();
-  const shareRef = React.useRef<HTMLButtonElement>(null);
+  const { close } = useModal();
 
   const router = useRouter();
   const isSubPage = router.pathname !== "/";
@@ -57,7 +53,6 @@ export default function Header({ title, parent }: Props) {
           </nav>
         )}
       </div>
-      <AccountDropdown className="ml-auto md:ml-0 sm:mr-8 mr-6 block" />
     </header>
   );
 }

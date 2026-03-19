@@ -8,7 +8,6 @@ import Head from "next/head";
 import Button from "components/Button";
 import Footer from "components/Footer";
 import Icon from "components/Icon";
-import LoginModal from "components/LoginModal";
 import Link from "next/link";
 
 export default function ImportLifelist() {
@@ -89,7 +88,6 @@ export default function ImportLifelist() {
         </div>
       </main>
       <Footer />
-      <LoginModal showLoader={false} />
     </div>
   );
 }

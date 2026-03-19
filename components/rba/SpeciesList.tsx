@@ -42,7 +42,7 @@ export default function SpeciesList({ heading, items, expanded, onToggleExpand, 
                 <img
                   src={imgUrl || "/placeholder.png"}
                   alt={name}
-                  className={clsx("w-16 h-16 rounded-lg object-cover", !imgUrl && "opacity-60")}
+                  className={clsx("w-20 aspect-[4/3] rounded-lg object-cover", !imgUrl && "opacity-60")}
                   loading="lazy"
                 />
               </div>

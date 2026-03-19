@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import ABASpecies from "../../aba-species.json";
+import Avicommons from "../../avicommons.json";
 import { find } from "geo-tz";
 import dayjs from "dayjs";
 
@@ -20,6 +21,15 @@ type RbaResponse = {
   subId: string;
   subnational1Code: string;
 };
+
+const avicommons = Avicommons as unknown as Record<string, [string, string]>;
+
+function getImgUrl(speciesCode: string): string | undefined {
+  const entry = avicommons[speciesCode];
+  if (!entry) return undefined;
+  const [photoId] = entry;
+  return `https://static.avicommons.org/${speciesCode}-${photoId}-240.jpg`;
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const country = "US";
@@ -56,19 +66,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!reportsBySpecies[item.sciName]) {
       // @ts-ignore
       const abaSpecies = ABASpecies[item.sciName];
-      let imgUrl = undefined;
-      if (abaSpecies?.imgUrl) {
-        const imgSplit = abaSpecies.imgUrl.split("/");
-        if (abaSpecies.imgUrl.indexOf("/commons/") != -1) {
-          imgUrl =
-            abaSpecies.imgUrl.replace("/commons/", "/commons/thumb/") + "/200px-" + imgSplit[imgSplit.length - 1];
-        }
-      }
       reportsBySpecies[item.sciName] = {
         name: item.comName,
         sciName: item.sciName,
         abaCode: abaSpecies?.abaCode,
-        imgUrl,
+        imgUrl: getImgUrl(item.speciesCode),
         reports: [],
       };
     }

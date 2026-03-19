@@ -1,8 +1,6 @@
 import type { AppProps } from "next/app";
 import "styles/globals.css";
-import { UserProvider } from "providers/user";
 import { ModalProvider } from "providers/modals";
-import { ProfileProvider } from "providers/profile";
 import { Toaster } from "react-hot-toast";
 import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
 import { get } from "lib/helpers";
@@ -33,14 +31,10 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <UserProvider>
-          <Toaster containerStyle={{ zIndex: 10001 }} />
-          <ProfileProvider>
-            <ModalProvider>
-              <Component {...pageProps} />
-            </ModalProvider>
-          </ProfileProvider>
-        </UserProvider>
+        <Toaster containerStyle={{ zIndex: 10001 }} />
+        <ModalProvider>
+          <Component {...pageProps} />
+        </ModalProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

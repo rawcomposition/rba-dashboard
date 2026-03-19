@@ -13,7 +13,6 @@ import Select from "components/ReactSelectStyled";
 import { radiusOptions } from "lib/helpers";
 import Expand from "components/Expand";
 import Button from "components/Button";
-import LoginModal from "components/LoginModal";
 import { toast } from "react-hot-toast";
 import { debounce } from "lib/helpers";
 import { distanceBetween } from "lib/helpers";
@@ -201,7 +200,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-      <LoginModal />
     </div>
   );
 }
