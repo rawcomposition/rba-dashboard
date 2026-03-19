@@ -16,86 +16,112 @@ type Props = {
 
 export default function SpeciesList({ heading, items, expanded, onToggleExpand, lat, lng }: Props) {
   const getAbaCodeColor = (code?: number) => {
-    if (code && code <= 3) return "border-gray-200 text-gray-800";
-    if (code === 4) return "border-red-700 text-red-800";
-    if (code === 5) return "border-red-700 text-red-800";
+    if (code && code <= 3) return "bg-slate-100 text-slate-600 ring-1 ring-slate-200";
+    if (code === 4) return "bg-red-50 text-red-700 ring-1 ring-red-200";
+    if (code === 5) return "bg-red-50 text-red-700 ring-1 ring-red-200";
   };
-  return (
-    <div className="mb-8">
-      <h2 className="font-bold mb-4 text-gray-500">{heading}</h2>
-      {items?.length === 0 && <p className="text-gray-500 text-sm">No results found</p>}
-      {items?.map(({ name, sciName, reports, abaCode, imgUrl }) => {
-        const isExpanded = expanded.includes(sciName);
-        const date = reports[0].obsDt;
-        const distances = reports.map(({ distance }) => distance).filter((value) => !!value);
-        const shortestDistance = distances.sort((a, b) => (a || 0) - (b || 0)).shift() || null;
-        const distancesAllEqual = distances.every((value) => value === distances[0]);
-        reports = reports.map((report) => ({
-          ...report,
-          isClosest: !distancesAllEqual && shortestDistance === report.distance,
-        }));
 
-        return (
-          <article key={sciName} className="mb-4 border border-gray-200 bg-white shadow-sm rounded-md w-full">
-            <div className="flex cursor-pointer" onClick={() => onToggleExpand(sciName)}>
-              <div className="flex-shrink-0 p-4 mr-4">
-                <img
-                  src={imgUrl || "/placeholder.png"}
-                  alt={name}
-                  className={clsx("w-20 aspect-[4/3] rounded-lg object-cover", !imgUrl && "opacity-60")}
-                  loading="lazy"
-                />
-              </div>
-              <div className="pr-2 pt-3 xs:pr-4 w-full py-4 xs:flex xs:justify-between items-center">
-                <div className="flex flex-col gap-1">
-                  <h3 className="font-bold text-gray-800">{truncate(name, 32)}</h3>
-                  <div className="text-[13px] text-gray-600 flex items-center gap-2">
-                    <span>
-                      {reports.length} {reports.length === 1 ? "Report" : "Reports"}
+  return (
+    <div className="mb-10">
+      <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-4">{heading}</h2>
+      {items?.length === 0 && <p className="text-gray-500 text-sm italic">No results found</p>}
+      <div className="flex flex-col gap-3">
+        {items?.map(({ name, sciName, reports, abaCode, imgUrl }) => {
+          const isExpanded = expanded.includes(sciName);
+          const date = reports[0].obsDt;
+          const distances = reports.map(({ distance }) => distance).filter((value) => !!value);
+          const shortestDistance = distances.sort((a, b) => (a || 0) - (b || 0)).shift() || null;
+          const distancesAllEqual = distances.every((value) => value === distances[0]);
+          reports = reports.map((report) => ({
+            ...report,
+            isClosest: !distancesAllEqual && shortestDistance === report.distance,
+          }));
+
+          return (
+            <article
+              key={sciName}
+              className={clsx(
+                "bg-white rounded-xl border transition-all duration-200",
+                isExpanded ? "border-slate-200 shadow-md" : "border-slate-100 shadow-sm"
+              )}
+            >
+              <div
+                className="flex items-center cursor-pointer select-none gap-3 p-3 sm:p-4"
+                onClick={() => onToggleExpand(sciName)}
+              >
+                <div className="flex-shrink-0">
+                  <img
+                    src={imgUrl || "/placeholder.png"}
+                    alt={name}
+                    className={clsx(
+                      "w-16 h-12 sm:w-20 sm:h-[60px] rounded-lg object-cover ring-1 ring-black/5",
+                      !imgUrl && "opacity-50 grayscale"
+                    )}
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex-1 min-w-0 xs:flex xs:items-center xs:justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-slate-800 truncate">{truncate(name, 32)}</h3>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-slate-600">
+                        {reports.length} {reports.length === 1 ? "report" : "reports"}
+                      </span>
+                      {abaCode && (
+                        <span
+                          className={clsx(
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium leading-none",
+                            getAbaCodeColor(abaCode)
+                          )}
+                        >
+                          Code {abaCode}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1.5 xs:mt-0 flex-shrink-0">
+                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                      <Timeago datetime={date} />
                     </span>
-                    {abaCode && (
-                      <span
-                        className={clsx(
-                          "border rounded flex items-center justify-center text-[10.5px] px-1 mt-px",
-                          getAbaCodeColor(abaCode)
-                        )}
-                      >
-                        Code {abaCode}
+                    {!!lat && !!lng && !!shortestDistance && (
+                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                        <Icon name="map" className="mr-1 text-slate-500 text-[0.85em]" />
+                        {shortestDistance} mi
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="whitespace-nowrap flex gap-2 items-center mt-2 xs:mt-0">
-                  <span className="bg-gray-300 text-gray-600 rounded-sm px-2 py-1 text-xs whitespace-nowrap">
-                    <Timeago datetime={date} />
-                  </span>
-                  {!!lat && !!lng && !!shortestDistance && (
-                    <span className="rounded-sm px-2 py-1 text-xs whitespace-nowrap bg-gray-300 text-gray-600">
-                      <Icon name="map" className="mr-1 mt-[-2px] text-[0.85em]" />
-                      {shortestDistance} mi
-                    </span>
-                  )}
+                <div className="flex-shrink-0 pl-1">
+                  <div
+                    className={clsx(
+                      "w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200",
+                      isExpanded ? "bg-slate-200 rotate-180" : "bg-slate-100"
+                    )}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="w-3.5 h-3.5 text-slate-500"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center pr-4 pl-1">
-                <button
-                  type="button"
-                  className={clsx("w-5 h-5 transition-all ease-in-out", isExpanded && "rotate-180")}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
-                    <path d="M239 401c9.4 9.4 24.6 9.4 33.9 0L465 209c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-175 175L81 175c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9L239 401z" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            {isExpanded && (
-              <ul className="pl-4 pr-4 pb-4 flex flex-col gap-4">
-                <ObservationList items={reports} userLat={lat} userLng={lng} />
-              </ul>
-            )}
-          </article>
-        );
-      })}
+              {isExpanded && (
+                <div className="border-t border-slate-100 px-4 pb-4">
+                  <ObservationList items={reports} userLat={lat} userLng={lng} />
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
