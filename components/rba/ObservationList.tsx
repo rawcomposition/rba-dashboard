@@ -33,16 +33,18 @@ export default function ObservationList({ userLat, userLng, items }: Props) {
                 {truncate(locName, 45)}
                 <span className="text-slate-500">, {subnational2Name}, {subnational1Name}</span>
               </h4>
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                {isClosest && (
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
-                    Closest
+              {distance != null && (
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {isClosest && (
+                    <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                      Closest
+                    </span>
+                  )}
+                  <span className="inline-flex items-center rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-500 ring-1 ring-slate-200">
+                    {distance} mi
                   </span>
-                )}
-                <span className="inline-flex items-center rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-500 ring-1 ring-slate-200">
-                  {distance} mi
-                </span>
-              </div>
+                </div>
+              )}
             </div>
 
             <p className="text-xs text-slate-500 mt-1">

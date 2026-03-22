@@ -161,7 +161,7 @@ export default function Home() {
 
         <div className="h-full overflow-auto grow pt-6 px-4 pb-6">
           <div className="container mx-auto max-w-xl">
-            {error && <FetchError reload={call} />}
+            {error && <FetchError reload={call} message={error} />}
 
             {loading && <Skeleton count={3} />}
 

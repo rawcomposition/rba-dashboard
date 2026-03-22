@@ -32,52 +32,61 @@ function getImgUrl(speciesCode: string): string | undefined {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const country = "US";
-  const excludeStates = ["US-HI", "US-AK"];
+  try {
+    const country = "US";
+    const excludeStates = ["US-HI", "US-AK"];
 
-  const response = await fetch(
-    `https://api.ebird.org/v2/data/obs/${country}/recent/notable?detail=full&back=1&key=${process.env.NEXT_PUBLIC_EBIRD_KEY}`
-  );
-  let reports: RbaResponse[] = await response.json();
-
-  if (!reports?.length) {
-    return res.status(200).json([]);
-  }
-
-  reports = reports
-    //Remove duplicates. For unknown reasons, eBird sometimes returns duplicates
-    .filter((value, index, array) => array.findIndex((searchItem) => searchItem.obsId === value.obsId) === index)
-    .map((item) => {
-      const timezones = find(Number(item.lat), Number(item.lng));
-      const timezone = timezones[0];
-      const datetime = dayjs.tz(item.obsDt, timezone);
-      return {
-        ...item,
-        obsDt: datetime.format(),
-      };
-    })
-    .filter(
-      ({ comName, subnational1Code }) => !comName.includes("(hybrid)") && !excludeStates.includes(subnational1Code)
+    const response = await fetch(
+      `https://api.ebird.org/v2/data/obs/${country}/recent/notable?detail=full&back=1&key=${process.env.NEXT_PUBLIC_EBIRD_KEY}`
     );
-
-  const reportsBySpecies: any = {};
-
-  reports.forEach((item) => {
-    if (!reportsBySpecies[item.sciName]) {
-      // @ts-ignore
-      const abaSpecies = ABASpecies[item.sciName];
-      reportsBySpecies[item.sciName] = {
-        name: item.comName,
-        sciName: item.sciName,
-        abaCode: abaSpecies?.abaCode,
-        imgUrl: getImgUrl(item.speciesCode),
-        reports: [],
-      };
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      return res.status(response.status).json({ error: `eBird API error (${response.status}): ${text}`.trim() });
     }
-    reportsBySpecies[item.sciName].reports.push(item);
-  });
+    let reports: RbaResponse[] = await response.json();
 
-  const species = Object.entries(reportsBySpecies).map(([key, value]) => value);
+    if (!reports?.length) {
+      return res.status(200).json([]);
+    }
 
-  res.status(200).json([...species]);
+    reports = reports
+      //Remove duplicates. For unknown reasons, eBird sometimes returns duplicates
+      .filter((value, index, array) => array.findIndex((searchItem) => searchItem.obsId === value.obsId) === index)
+      .map((item) => {
+        const timezones = find(Number(item.lat), Number(item.lng));
+        const timezone = timezones[0];
+        const datetime = dayjs.tz(item.obsDt, timezone);
+        return {
+          ...item,
+          obsDt: datetime.format(),
+        };
+      })
+      .filter(
+        ({ comName, subnational1Code }) => !comName.includes("(hybrid)") && !excludeStates.includes(subnational1Code)
+      );
+
+    const reportsBySpecies: any = {};
+
+    reports.forEach((item) => {
+      if (!reportsBySpecies[item.sciName]) {
+        // @ts-ignore
+        const abaSpecies = ABASpecies[item.sciName];
+        reportsBySpecies[item.sciName] = {
+          name: item.comName,
+          sciName: item.sciName,
+          abaCode: abaSpecies?.abaCode,
+          imgUrl: getImgUrl(item.speciesCode),
+          reports: [],
+        };
+      }
+      reportsBySpecies[item.sciName].reports.push(item);
+    });
+
+    const species = Object.entries(reportsBySpecies).map(([key, value]) => value);
+
+    res.status(200).json([...species]);
+  } catch (error: any) {
+    console.error("get-rba error:", error);
+    res.status(500).json({ error: error?.message || "Internal server error" });
+  }
 }
