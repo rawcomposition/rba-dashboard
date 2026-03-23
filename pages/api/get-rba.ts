@@ -3,6 +3,10 @@ import ABASpecies from "../../aba-species.json";
 import Avicommons from "../../avicommons.json";
 import { find } from "geo-tz";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type RbaResponse = {
   obsId: string;
