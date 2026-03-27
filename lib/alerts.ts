@@ -22,8 +22,8 @@ export type AlertConfig = RegionAlertConfig | RadiusAlertConfig;
 
 export const alerts: AlertConfig[] = [
   {
-    id: "us",
-    name: "US (Lower 48)",
+    id: "lower48",
+    name: "Lower 48",
     type: "region",
     back: 1,
     regionCode: "US",
