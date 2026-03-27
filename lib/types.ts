@@ -1,5 +1,5 @@
 export type Profile = {
-  countryLifelist: string[];
+  lifelists: Record<string, string[]>;
   radius: number;
   lat?: number;
   lng?: number;

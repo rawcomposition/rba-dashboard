@@ -11,10 +11,10 @@ type Props = {
   onToggleExpand: (code: string) => void;
   lat?: number;
   lng?: number;
-  heading: string;
+  highlightRadius?: number;
 };
 
-export default function SpeciesList({ heading, items, expanded, onToggleExpand, lat, lng }: Props) {
+export default function SpeciesList({ items, expanded, onToggleExpand, lat, lng, highlightRadius }: Props) {
   const getAbaCodeColor = (code?: number) => {
     if (code && code <= 3) return "bg-slate-100 text-slate-600 ring-1 ring-slate-200";
     if (code === 4) return "bg-red-50 text-red-700 ring-1 ring-red-200";
@@ -23,7 +23,6 @@ export default function SpeciesList({ heading, items, expanded, onToggleExpand, 
 
   return (
     <div className="mb-10">
-      <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-4">{heading}</h2>
       {items?.length === 0 && <p className="text-gray-500 text-sm italic">No results found</p>}
       <div className="flex flex-col gap-3">
         {items?.map(({ name, sciName, reports, abaCode, imgUrl }) => {
@@ -83,12 +82,22 @@ export default function SpeciesList({ heading, items, expanded, onToggleExpand, 
                     <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
                       <Timeago datetime={date} />
                     </span>
-                    {!!lat && !!lng && !!shortestDistance && (
-                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
-                        <Icon name="map" className="mr-1 text-slate-500 text-[0.85em]" />
-                        {shortestDistance} mi
-                      </span>
-                    )}
+                    {!!lat && !!lng && !!shortestDistance && (() => {
+                      const isNearby = highlightRadius && shortestDistance <= highlightRadius;
+                      return (
+                        <span
+                          className={clsx(
+                            "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium",
+                            isNearby
+                              ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                              : "bg-slate-100 text-slate-600"
+                          )}
+                        >
+                          <Icon name="map" className={clsx("mr-1 text-[0.85em]", isNearby ? "text-emerald-500" : "text-slate-500")} />
+                          {shortestDistance} mi
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
                 <div className="flex-shrink-0 pl-1">

@@ -1,6 +1,7 @@
 import React from "react";
 import dayjs from "dayjs";
 import { Species } from "lib/types";
+import { AlertConfig } from "lib/alerts";
 
 interface State {
   error: string | false;
@@ -9,7 +10,7 @@ interface State {
   species: Species[];
 }
 
-export default function useFetchRBA() {
+export default function useFetchRBA(alert: AlertConfig) {
   const [state, setState] = React.useState<State>({
     error: false,
     loading: false,
@@ -20,7 +21,22 @@ export default function useFetchRBA() {
   const call = React.useCallback(async (retries = 1) => {
     setState((current) => ({ ...current, loading: true, error: false, species: [] }));
     try {
-      const response = await fetch("/api/get-rba");
+      const params = new URLSearchParams();
+      params.set("type", alert.type);
+      params.set("back", String(alert.back));
+
+      if (alert.type === "region") {
+        params.set("regionCode", alert.regionCode);
+        if (alert.excludeSubRegions.length > 0) {
+          params.set("excludeSubRegions", alert.excludeSubRegions.join(","));
+        }
+      } else {
+        params.set("lat", String(alert.lat));
+        params.set("lng", String(alert.lng));
+        params.set("dist", String(alert.dist));
+      }
+
+      const response = await fetch(`/api/get-rba?${params.toString()}`);
       if (!response.ok) {
         const data = await response.json().catch(() => null);
         throw new Error(data?.error || `Request failed (${response.status})`);
@@ -44,7 +60,7 @@ export default function useFetchRBA() {
         species: [],
       }));
     }
-  }, []);
+  }, [alert]);
 
   return { ...state, call };
 }

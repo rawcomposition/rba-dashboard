@@ -37,12 +37,31 @@ function getImgUrl(speciesCode: string): string | undefined {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const country = "US";
-    const excludeStates = ["US-HI", "US-AK"];
+    const type = (req.query.type as string) || "region";
+    const back = (req.query.back as string) || "1";
 
-    const response = await fetch(
-      `https://api.ebird.org/v2/data/obs/${country}/recent/notable?detail=full&back=1&key=${process.env.NEXT_PUBLIC_EBIRD_KEY}`
-    );
+    let url: string;
+    let excludeSubRegions: string[] = [];
+
+    if (type === "radius") {
+      const lat = req.query.lat as string;
+      const lng = req.query.lng as string;
+      const dist = req.query.dist as string;
+
+      if (!lat || !lng || !dist) {
+        return res.status(400).json({ error: "lat, lng, and dist are required for radius alerts" });
+      }
+
+      url = `https://api.ebird.org/v2/data/obs/geo/recent/notable?lat=${lat}&lng=${lng}&dist=${dist}&detail=full&back=${back}&key=${process.env.NEXT_PUBLIC_EBIRD_KEY}`;
+    } else {
+      const regionCode = (req.query.regionCode as string) || "US";
+      const excludeParam = req.query.excludeSubRegions as string;
+      excludeSubRegions = excludeParam ? excludeParam.split(",") : ["US-HI", "US-AK"];
+
+      url = `https://api.ebird.org/v2/data/obs/${regionCode}/recent/notable?detail=full&back=${back}&key=${process.env.NEXT_PUBLIC_EBIRD_KEY}`;
+    }
+
+    const response = await fetch(url);
     if (!response.ok) {
       const text = await response.text().catch(() => "");
       return res.status(response.status).json({ error: `eBird API error (${response.status}): ${text}`.trim() });
@@ -54,20 +73,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     reports = reports
-      //Remove duplicates. For unknown reasons, eBird sometimes returns duplicates
       .filter((value, index, array) => array.findIndex((searchItem) => searchItem.obsId === value.obsId) === index)
       .map((item) => {
         const timezones = find(Number(item.lat), Number(item.lng));
-        const timezone = timezones[0];
-        const datetime = dayjs.tz(item.obsDt, timezone);
+        const tz = timezones[0];
+        const datetime = dayjs.tz(item.obsDt, tz);
         return {
           ...item,
           obsDt: datetime.format(),
         };
       })
-      .filter(
-        ({ comName, subnational1Code }) => !comName.includes("(hybrid)") && !excludeStates.includes(subnational1Code)
-      );
+      .filter(({ comName, subnational1Code }) => {
+        if (comName.includes("(hybrid)")) return false;
+        if (excludeSubRegions.length > 0 && excludeSubRegions.includes(subnational1Code)) return false;
+        return true;
+      });
 
     const reportsBySpecies: any = {};
 

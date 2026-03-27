@@ -9,15 +9,18 @@ import Button from "components/Button";
 import Footer from "components/Footer";
 import Icon from "components/Icon";
 import Link from "next/link";
+import { alerts } from "lib/alerts";
 
 export default function ImportLifelist() {
-  const { setCountryLifelist } = useProfile();
+  const { setLifelist } = useProfile();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const router = useRouter();
-  const { tripId } = router.query;
+  const { tripId, alertId } = router.query;
   const showBack = router.query.back === "true" && tripId;
   const redirectUrl = tripId ? `/${tripId}` : `/`;
+
+  const alert = alerts.find((a) => a.id === alertId) || alerts[0];
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -26,7 +29,6 @@ export default function ImportLifelist() {
       Papa.parse(file, {
         header: true,
         complete: async function (results: any) {
-          // Extract the scientific names
           const sciNames = results.data
             .filter((it: any) => it.Countable === "1" && it.Category === "species")
             .map((it: any) => it["Scientific Name"]?.trim())
@@ -34,7 +36,7 @@ export default function ImportLifelist() {
 
           fileInputRef.current?.value && (fileInputRef.current.value = "");
 
-          setCountryLifelist(sciNames);
+          setLifelist(alert.id, sciNames);
           toast.success("Life list uploaded");
           router.push(redirectUrl);
         },
@@ -45,6 +47,9 @@ export default function ImportLifelist() {
       fileInputRef.current?.value && (fileInputRef.current.value = "");
     }
   };
+
+  const isRegion = alert.type === "region";
+  let stepNumber = 1;
 
   return (
     <div className="flex flex-col h-full">
@@ -61,23 +66,29 @@ export default function ImportLifelist() {
         )}
         <div className="p-4 md:p-0 mt-8">
           <h1 className="text-3xl font-bold text-gray-700 mb-8">
-            <Icon name="feather" className="text-2xl text-lime-600" /> Import US Life List
+            <Icon name="feather" className="text-2xl text-lime-600" /> Import {alert.name} Life List
           </h1>
+          {isRegion && (
+            <div className="pt-4 p-5 bg-white rounded-lg shadow mb-8">
+              <h3 className="text-lg font-medium mb-4 text-gray-700">{stepNumber++}. Download life list from eBird</h3>
+              <Button
+                href={alert.lifelistDownloadUrl}
+                target="_blank"
+                color="primary"
+                size="sm"
+                className="inline-flex items-center gap-2"
+              >
+                <Icon name="download" /> Download Life List
+              </Button>
+            </div>
+          )}
           <div className="pt-4 p-5 bg-white rounded-lg shadow mb-8">
-            <h3 className="text-lg font-medium mb-4 text-gray-700">1. Download life list from eBird</h3>
-            <Button
-              href={`https://ebird.org/lifelist?r=US&time=life&fmt=csv`}
-              target="_blank"
-              color="primary"
-              size="sm"
-              className="inline-flex items-center gap-2"
-            >
-              <Icon name="download" /> Download Life List
-            </Button>
-          </div>
-          <div className="pt-4 p-5 bg-white rounded-lg shadow mb-8">
-            <h3 className="text-lg font-medium mb-4 text-gray-700">2. Upload file</h3>
-            <p className="text-sm text-gray-600 mb-2">Upload the CSV file you downloaded in step 1.</p>
+            <h3 className="text-lg font-medium mb-4 text-gray-700">{stepNumber++}. Upload file</h3>
+            <p className="text-sm text-gray-600 mb-2">
+              {isRegion
+                ? "Upload the CSV file you downloaded in the previous step."
+                : "Upload a CSV life list file exported from eBird."}
+            </p>
             <input ref={fileInputRef} type="file" accept=".csv" className="text-xs" onChange={handleFileUpload} />
           </div>
           <div className="flex">
