@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: "lat, lng, and dist are required for radius alerts" });
       }
 
-      url = `https://api.ebird.org/v2/data/obs/geo/recent/notable?lat=${lat}&lng=${lng}&dist=${dist}&detail=full&back=${back}&key=${process.env.NEXT_PUBLIC_EBIRD_KEY}`;
+      url = `https://api.ebird.org/v2/data/obs/geo/recent?lat=${lat}&lng=${lng}&dist=${dist}&back=${back}&cat=species&includeProvisional=true&detail=full&key=${process.env.NEXT_PUBLIC_EBIRD_KEY}`;
     } else {
       const regionCode = (req.query.regionCode as string) || "US";
       const excludeParam = req.query.excludeSubRegions as string;
@@ -73,7 +73,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     reports = reports
-      .filter((value, index, array) => array.findIndex((searchItem) => searchItem.obsId === value.obsId) === index)
+      .filter((value, index, array) => {
+        if (value.obsId) {
+          return array.findIndex((s) => s.obsId === value.obsId) === index;
+        }
+        return array.findIndex((s) => s.speciesCode === value.speciesCode && s.locId === value.locId && s.obsDt === value.obsDt) === index;
+      })
       .map((item) => {
         const timezones = find(Number(item.lat), Number(item.lng));
         const tz = timezones[0];

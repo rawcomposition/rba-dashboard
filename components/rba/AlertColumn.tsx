@@ -98,9 +98,9 @@ export default function AlertColumn({ alert, showTitle }: Props) {
             />
           )}
 
-          {!!filteredSpecies?.length && (
+          {!loading && lastUpdate && (
             <ResultsInfo
-              count={filteredSpecies.length}
+              count={filteredSpecies?.length || 0}
               total={species?.length || 0}
               onReload={call}
               lastUpdate={lastUpdate?.toString()}

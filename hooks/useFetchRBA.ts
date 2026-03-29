@@ -18,22 +18,26 @@ export default function useFetchRBA(alert: AlertConfig) {
     species: [],
   });
 
+  const alertRef = React.useRef(alert);
+  alertRef.current = alert;
+
   const call = React.useCallback(async (retries = 1) => {
+    const a = alertRef.current;
     setState((current) => ({ ...current, loading: true, error: false, species: [] }));
     try {
       const params = new URLSearchParams();
-      params.set("type", alert.type);
-      params.set("back", String(alert.back));
+      params.set("type", a.type);
+      params.set("back", String(a.back));
 
-      if (alert.type === "region") {
-        params.set("regionCode", alert.regionCode);
-        if (alert.excludeSubRegions.length > 0) {
-          params.set("excludeSubRegions", alert.excludeSubRegions.join(","));
+      if (a.type === "region") {
+        params.set("regionCode", a.regionCode);
+        if (a.excludeSubRegions.length > 0) {
+          params.set("excludeSubRegions", a.excludeSubRegions.join(","));
         }
       } else {
-        params.set("lat", String(alert.lat));
-        params.set("lng", String(alert.lng));
-        params.set("dist", String(alert.dist));
+        params.set("lat", String(a.lat));
+        params.set("lng", String(a.lng));
+        params.set("dist", String(a.dist));
       }
 
       const response = await fetch(`/api/get-rba?${params.toString()}`);
@@ -60,7 +64,7 @@ export default function useFetchRBA(alert: AlertConfig) {
         species: [],
       }));
     }
-  }, [alert]);
+  }, []);
 
   return { ...state, call };
 }
