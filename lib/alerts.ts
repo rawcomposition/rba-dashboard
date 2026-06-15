@@ -3,6 +3,7 @@ export type RegionAlertConfig = {
   name: string;
   type: "region";
   back: number;
+  enabled?: boolean;
   regionCode: string;
   excludeSubRegions: string[];
   lifelistDownloadUrl: string;
@@ -13,6 +14,7 @@ export type RadiusAlertConfig = {
   name: string;
   type: "radius";
   back: number;
+  enabled?: boolean;
   lat: number;
   lng: number;
   dist: number;
@@ -20,12 +22,13 @@ export type RadiusAlertConfig = {
 
 export type AlertConfig = RegionAlertConfig | RadiusAlertConfig;
 
-export const alerts: AlertConfig[] = [
+const allAlerts: AlertConfig[] = [
   {
     id: "7.5mr",
     name: "7.5 MR",
     type: "radius",
     back: 3,
+    enabled: false,
     lat: 33.58406395653916,
     lng: -117.18464387510173,
     dist: 12.07, // km
@@ -40,3 +43,5 @@ export const alerts: AlertConfig[] = [
     lifelistDownloadUrl: "https://ebird.org/lifelist?r=US&time=life&fmt=csv",
   },
 ];
+
+export const alerts: AlertConfig[] = allAlerts.filter((alert) => alert.enabled !== false);
